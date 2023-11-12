@@ -8,7 +8,7 @@ const backendUrl = process.env.REACT_APP_BACKEND_URL;
 const apiKey = process.env.REACT_APP_API_KEY;
 
 export default function App() {
-  const [query, setQuery] = useState('rambo');
+  const [query, setQuery] = useState('');
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,9 +57,8 @@ export default function App() {
         setIsLoading(false);
         setError('');
       } catch (err) {
-        console.log(err.message);
-
         if (err.name !== 'AbortError') {
+          console.log(err.message);
           setError(err.message);
         }
       } finally {
@@ -73,6 +72,7 @@ export default function App() {
       return;
     }
 
+    handleCloseMovie();
     fetchMovies();
 
     return () => controller.abort();
@@ -247,6 +247,17 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     onAddWatched(newWatchedMovie);
     onCloseMovie();
   }
+
+  useEffect(() => {
+    const callback = (e) => {
+      if (e.code === 'Escape') {
+        onCloseMovie();
+      }
+    };
+    document.addEventListener('keydown', callback);
+
+    return () => document.removeEventListener('keydown', callback);
+  }, [onCloseMovie]);
 
   useEffect(() => {
     const getMovieDetails = async () => {
